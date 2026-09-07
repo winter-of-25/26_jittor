@@ -1,0 +1,23 @@
+name: jittor
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9.25
+  - pip=26.0.1
+  - gcc=10.4.0
+  - gxx=10.4.0
+  - libgomp
+  - pip:
+      - "setuptools==80.9.0"
+      - "wheel==0.45.1"
+      - "six==1.17.0"
+      - "astunparse==1.6.3"
+      - "tqdm==4.68.4"
+      - "Pillow==11.3.0"
+      - "numpy==1.26.4"
+      - "scipy==1.13.1"
+      - "trimesh==4.12.2"
+      - "omegaconf==2.3.0"
+      - "PyYAML==6.0.3"
+      - "antlr4-python3-runtime==4.9.3"
+      - "jittor==1.3.11.0"
