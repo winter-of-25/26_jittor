@@ -1,0 +1,40 @@
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Jittor / CUDA build cache
+.cache/
+.jittor/
+
+# Competition data and generated artifacts
+dataset_train/
+dataset_test_noisy/
+datalist/*.cache
+results/
+validation/
+logs/
+checkpoints/
+parents/
+*.pkl
+*.pth
+*.pt
+*.ckpt
+*.npy
+*.npz
+result.zip
+result.zip.sha256
+pipeline.log
+pipeline.pid
+pipeline_started.txt
+pipeline_complete.txt
+pipeline_failed.txt
+training_finished_before_test_access
+
+# Local archives
+*.tar
+*.tar.gz
+*.zip
