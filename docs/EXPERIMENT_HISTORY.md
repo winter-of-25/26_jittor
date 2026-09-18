@@ -1,31 +1,31 @@
-# Experiment History
+# 实验历程
 
-This page gives a high-level, public-facing overview of how the final system evolved.
+本文档从公开展示角度概述最终系统的演化过程。
 
-## Reproduction Baseline
+## 复现基线
 
-The project started from a StraightPCF / IterativePFN-style point cloud denoising baseline. The first reproduced system reached about 73.61 on the public leaderboard, establishing a reliable implementation and evaluation pipeline.
+项目最初从 StraightPCF / IterativePFN 风格的点云去噪基线出发。初始复现系统在公开榜单上达到约 73.61，为后续模型改进建立了稳定的实现与评估流程。
 
-## Stable Parent Model
+## 稳定 parent 模型
 
-V12 became the first strong and stable parent model, reaching about 80.70. It confirmed that patch-based local denoising was a good fit for the dataset and later served as an important initialization point.
+V12 是第一个表现稳定的强 parent 模型，分数约为 80.70。该版本验证了 patch 级局部去噪路线适合赛题数据，并成为后续多个版本的重要初始化基础。
 
-## Architecture Improvement
+## 架构改进
 
-Subsequent versions explored residual refinement, cross-patch consensus, hierarchical residual modeling and noise-conditioned dual-path designs. Representative milestones include:
+后续版本围绕 residual refinement、cross-patch consensus、hierarchical residual modeling 和 noise-conditioned dual-path 等方向展开。代表性节点包括：
 
-- V29: first clear architecture-level improvement.
-- V33 / V34: improved residual refinement and local consistency.
-- V40 / V41: better balance between CD and P2S.
-- V45: stable late-stage parent model.
-- V65: final A-leaderboard model.
+- V29：首次体现出明确的架构级提升。
+- V33 / V34：增强 residual refinement 与局部一致性。
+- V40 / V41：改善 CD 与 P2S 的平衡。
+- V45：A 榜后期稳定 parent 模型。
+- V65：A 榜最终模型。
 
-## B-leaderboard Adaptation
+## B 榜适配
 
-After the B-leaderboard data became available, the system was adapted to the new distribution. Early B versions transferred the A-leaderboard parent models and then refined data usage, validation and residual strength selection.
+B 榜数据开放后，系统针对新分布进行适配。早期 B 版本继承 A 榜 parent 模型，并逐步调整数据使用、固定验证和 residual strength 选择。
 
-B20 provided a strong B-leaderboard baseline. B24 further introduced the CAVR-v2 constrained residual design and stricter validation/inference locking, producing the final B-leaderboard submission.
+B20 提供了较强的 B 榜基线。B24 在此基础上引入 CAVR-v2 受约束残差设计，并加强验证与推理锁定流程，形成最终 B 榜提交系统。
 
-## Final Design Choice
+## 最终设计选择
 
-The final design prioritizes robustness and reproducibility. Rather than replacing the parent model with an unconstrained new branch, B24 uses a bounded residual student around a frozen teacher. This keeps the model stable while still allowing local geometric improvement.
+最终方案优先考虑稳定性与可复现性。B24 没有用完全自由的新分支替代 parent 模型，而是在冻结 teacher 周围训练受约束的 student residual。该设计能够在保持 teacher 稳定性的同时，继续改善局部几何细节。
