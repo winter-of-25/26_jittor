@@ -1,19 +1,19 @@
-# Technical Design
+# 技术设计
 
-## Task
+## 任务说明
 
-Track 2 of the Jittor Challenge focuses on 3D point cloud denoising. Given a noisy point cloud, the model predicts a denoised point cloud that better matches the underlying object surface.
+赛道二关注三维点云去噪。模型输入为带噪点云，输出为更贴近物体真实表面的去噪点云。
 
-The evaluation considers both:
+评测同时关注两个指标：
 
-- **CD / Chamfer Distance**: global point-set distance.
-- **P2S / point-to-surface distance**: local surface fitting quality.
+- **CD / Chamfer Distance**：衡量输出点云与目标表面的整体点集距离。
+- **P2S / point-to-surface distance**：衡量输出点到连续表面的局部贴合质量。
 
-These two objectives are correlated but not identical. A model that moves points aggressively may improve one metric while degrading the other. B24 / CAVR-v2 is designed to improve local geometry while keeping the prediction anchored to a stable denoising baseline.
+这两个目标相关但并不完全一致。过强的点位移可能改善一个指标，却损害另一个指标。因此 B24 / CAVR-v2 的设计重点是：在稳定 teacher 的几何锚点附近进行局部修正，而不是让 student 自由产生大幅移动。
 
-## Architecture
+## 模型结构
 
-B24 / CAVR-v2 combines a frozen teacher branch and a trainable student branch:
+B24 / CAVR-v2 由冻结 teacher 分支和可训练 student 分支组成：
 
 ```text
 noisy patch
@@ -28,63 +28,63 @@ student_raw - teacher
     -> denoised point cloud
 ```
 
-Main implementation files:
+主要源码：
 
-- `code/b24_model.py`: model definition and bounded residual inference.
-- `code/train_b24.py`: training stages and task losses.
-- `code/b24_cagrad.py`: multi-objective gradient handling.
-- `code/orthogonal_backbones_v62_v65.py`: patch-based inference and fusion.
-- `code/validate_b24.py`: fixed validation and checkpoint selection.
-- `code/infer_b24.py`: test-set inference.
+- `code/b24_model.py`：模型定义与 bounded residual 推理。
+- `code/train_b24.py`：训练阶段与任务损失。
+- `code/b24_cagrad.py`：多目标梯度处理。
+- `code/orthogonal_backbones_v62_v65.py`：patch 推理与融合。
+- `code/validate_b24.py`：固定验证与 checkpoint 选择。
+- `code/infer_b24.py`：测试集推理。
 
-## CAVR: Constrained Anchor Vector Residual
+## CAVR：受约束锚点残差
 
-The final prediction is produced by adding a bounded student residual to the teacher output:
+最终预测由 teacher 输出加上受约束的 student 残差得到：
 
 ```text
 candidate = teacher + clip(student_raw - teacher, cap)
 cap = 0.10 * r32
 ```
 
-Here `r32` is a local neighborhood scale. The residual bound is adaptive: sparse or large-scale regions allow different movement ranges than dense fine-detail regions.
+其中 `r32` 表示局部邻域尺度。残差上限随局部点云密度与几何尺度变化，使稀疏区域和细节区域拥有不同的修正范围。
 
-This design has three practical benefits:
+这一设计有三个作用：
 
-- It preserves the robustness of a strong frozen teacher.
-- It allows the student to refine local geometric details.
-- It reduces unstable point displacement under distribution shift.
+- 保留强 teacher 的稳定性。
+- 允许 student 修正局部几何细节。
+- 降低分布变化下的不稳定点位移。
 
-## Multi-objective Training
+## 多目标训练
 
-The training objective contains two task losses:
+训练目标包含两个主要任务：
 
-- `cd_task`: relative CD improvement.
-- `surface_task`: relative surface-fitting improvement.
+- `cd_task`：面向 CD 的相对改善。
+- `surface_task`：面向表面贴合质量的相对改善。
 
-Instead of using a fixed weighted sum only, B24 uses CAGrad-style gradient composition to reduce gradient conflict between CD and P2S optimization.
+B24 使用 CAGrad 风格的梯度合成来缓解 CD 与 P2S 优化方向的冲突，而不是只依赖固定 loss 加权。
 
-## Validation and Inference Locking
+## 验证与推理锁定
 
-The pipeline records explicit training and selection states:
+流水线会记录明确的训练和选择状态：
 
 - `training_complete.json`
 - `eligible_checkpoints.json`
 - `selection_locked.json`
 - `test_access_allowed.json`
 
-`infer_b24.py` checks these files and validates checkpoint hashes before test-set inference. This makes the final prediction path deterministic and auditable.
+`infer_b24.py` 在测试集推理前会检查这些文件，并校验 checkpoint hash。这使最终预测路径可复现、可追踪。
 
-## Patch-based Inference
+## Patch 推理
 
-Full point clouds are processed with patch-based inference and then fused. Default inference parameters:
+完整点云通过局部 patch 推理后融合。默认推理参数：
 
-| Parameter | Value | Description |
+| 参数 | 取值 | 含义 |
 | --- | ---: | --- |
-| `patch_size` | 1000 | Points per local patch |
-| `seed_k` | 6 | Number of patch seeds |
-| `beta` | 12 | Fusion temperature |
-| `patch_batch` | 6 | Patch batch size |
+| `patch_size` | 1000 | 每个局部 patch 的点数 |
+| `seed_k` | 6 | patch seed 数量 |
+| `beta` | 12 | 融合权重温度 |
+| `patch_batch` | 6 | 推理时 patch batch size |
 
-## Relationship to Earlier Versions
+## 与历史版本的关系
 
-B24 inherits components and checkpoints from earlier high-performing versions, including V12, V29, V33, V41, V45 and V65. These versions provide stable parent representations and historical architectural components. B24 adds the CAVR-v2 residual constraint, B-leaderboard-oriented training and stricter reproducibility gates.
+B24 继承了 V12、V29、V33、V41、V45、V65 等历史高分版本的组件与 checkpoint。这些版本提供稳定的 parent 表示和结构基础。B24 在此基础上加入 CAVR-v2 残差约束、B 榜适配训练和更严格的复现检查。
