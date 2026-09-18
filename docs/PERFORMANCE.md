@@ -1,49 +1,37 @@
-# 性能记录
+# Performance
 
-## 最终成绩
+## Final Results
 
-| 阶段 | 版本 | 总分 | CD_score | P2S_score | 说明 |
-| --- | --- | ---: | ---: | ---: | --- |
-| B榜 | B24 | 81.44 | 70.15 | 92.73 | 最终提交版本，排名第6 |
-| A榜 | V65 | 83.13 | 73.21 | 93.06 | A榜后期最佳单模型方向 |
+| Leaderboard | Version | Rank | Score | CD_score | P2S_score |
+| --- | --- | ---: | ---: | ---: | ---: |
+| B榜 | B24 / CAVR-v2 | 6 | 81.44 | 70.15 | 92.73 |
+| A榜 | V65 | 12 | 83.13 | 73.21 | 93.06 |
 
-## A榜关键版本
+## Selected Model Evolution
 
-| 版本 | 总分 | CD_score | P2S_score | 备注 |
+The final system was developed through a sequence of increasingly stable denoising models. The table below lists representative milestones.
+
+| Version | Score | CD_score | P2S_score | Note |
 | --- | ---: | ---: | ---: | --- |
-| StraightPCF 复现 | 73.61 | - | - | 起点版本 |
-| V5 | 77.45 | - | - | 初步突破复现上限 |
-| V12 | 80.70 | 68.68 | 92.73 | 成为后续重要基座 |
-| V29 | 81.37 | 70.83 | 91.91 | 架构方向有效 |
-| V33 | 82.53 | 72.10 | 92.95 | V29 后续增强 |
-| V34 | 82.57 | 72.22 | 92.91 | 与 V33 接近 |
-| V40 | 82.89 | 72.78 | 93.01 | 稳定提升 |
-| V41 | 82.86 | 72.71 | 93.01 | 与 V40 接近 |
-| V45 | 83.00 | 72.94 | 93.06 | A榜后期稳定基座 |
-| V49 | 83.02 | 72.97 | 93.07 | 小幅提升 |
-| V65 | 83.13 | 73.21 | 93.06 | A榜最终保留方向 |
+| StraightPCF reproduction | 73.61 | - | - | Initial reproduction baseline |
+| V12 | 80.70 | 68.68 | 92.73 | Stable early parent model |
+| V29 | 81.37 | 70.83 | 91.91 | Effective architecture upgrade |
+| V33 | 82.53 | 72.10 | 92.95 | Improved residual refinement |
+| V40 | 82.89 | 72.78 | 93.01 | Strong CD/P2S balance |
+| V45 | 83.00 | 72.94 | 93.06 | Stable late A-leaderboard parent |
+| V65 | 83.13 | 73.21 | 93.06 | Final A-leaderboard model |
+| B20 | 81.41 | 70.10 | 92.71 | Strong B-leaderboard adaptation |
+| B24 | 81.44 | 70.15 | 92.73 | Final B-leaderboard model |
 
-## B榜关键版本
+## B-leaderboard Adaptation
 
-| 版本 | 总分 | CD_score | P2S_score | 备注 |
-| --- | ---: | ---: | ---: | --- |
-| B01 | 80.69 | 69.58 | 91.81 | A/B 混合后第一轮 |
-| B02 | 80.70 | 69.61 | 91.78 | 与 B01 接近 |
-| B05 | 80.74 | 69.69 | 91.79 | 作为后续基座之一 |
-| B14 | 80.99 | 69.78 | 92.20 | T4 方向 |
-| B15 | 80.99 | 69.66 | 92.31 | LANA 方向 |
-| B16 | 80.98 | 69.78 | 92.18 | DARC 方向 |
-| B17 | 81.00 | 69.77 | 92.23 | HERA 方向 |
-| B18 | 81.04 | 69.74 | 92.33 | BRIDGE 方向 |
-| B19 | 81.01 | 69.76 | 92.26 | HYFLOW 方向 |
-| B20 | 81.41 | 70.10 | 92.71 | B榜显著提升 |
-| B22 | 81.39 | 70.11 | 92.67 | 接近 B20 |
-| B24 | 81.44 | 70.15 | 92.73 | 最终最佳版本 |
+The B-leaderboard data distribution differs from the A-leaderboard distribution. Directly transferring an A-leaderboard model is a useful starting point, but B24 further adapts the model through:
 
-## 指标解读
+- B-leaderboard data lists and validation protocol.
+- Teacher-anchored residual refinement.
+- CD/P2S gradient conflict handling.
+- Fixed checkpoint and inference-strength selection.
 
-B榜相较 A榜出现了明显分布变化。A榜后期模型直接迁移并不能稳定涨分。B20-B24 的提升主要来自更稳的 B榜数据适配、对 CD/P2S 目标的同时约束、减少激进架构带来的线上回退，以及固定候选选择机制。
+## Ablation Insights
 
-## 失败或低收益方向
-
-后期尝试过多专家混合、router、point/patch gate、B-only 与更激进的新架构。部分方向在本地 proxy 上有局部 oracle 上限，但线上提升有限或回退。最终 B24 选择了更稳的 bounded residual，而不是继续堆复杂模型。
+Experiments with larger model changes and routing-style combinations showed that local complementarity does not always translate into robust leaderboard improvement. B24 therefore favors a stable residual design with explicit movement bounds and reproducible model selection.
