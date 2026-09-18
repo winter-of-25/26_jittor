@@ -1,37 +1,37 @@
-# Performance
+# 性能记录
 
-## Final Results
+## 最终成绩
 
-| Leaderboard | Version | Rank | Score | CD_score | P2S_score |
+| 榜单 | 版本 | 排名 | 总分 | CD_score | P2S_score |
 | --- | --- | ---: | ---: | ---: | ---: |
-| B榜 | B24 / CAVR-v2 | 6 | 81.44 | 70.15 | 92.73 |
-| A榜 | V65 | 12 | 83.13 | 73.21 | 93.06 |
+| B榜 | B24 / CAVR-v2 | 第6名 | 81.44 | 70.15 | 92.73 |
+| A榜 | V65 | 第12名 | 83.13 | 73.21 | 93.06 |
 
-## Selected Model Evolution
+## 代表性版本演进
 
-The final system was developed through a sequence of increasingly stable denoising models. The table below lists representative milestones.
+最终系统由多个稳定点云去噪模型逐步演化而来。下表列出部分代表性节点：
 
-| Version | Score | CD_score | P2S_score | Note |
+| 版本 | 总分 | CD_score | P2S_score | 说明 |
 | --- | ---: | ---: | ---: | --- |
-| StraightPCF reproduction | 73.61 | - | - | Initial reproduction baseline |
-| V12 | 80.70 | 68.68 | 92.73 | Stable early parent model |
-| V29 | 81.37 | 70.83 | 91.91 | Effective architecture upgrade |
-| V33 | 82.53 | 72.10 | 92.95 | Improved residual refinement |
-| V40 | 82.89 | 72.78 | 93.01 | Strong CD/P2S balance |
-| V45 | 83.00 | 72.94 | 93.06 | Stable late A-leaderboard parent |
-| V65 | 83.13 | 73.21 | 93.06 | Final A-leaderboard model |
-| B20 | 81.41 | 70.10 | 92.71 | Strong B-leaderboard adaptation |
-| B24 | 81.44 | 70.15 | 92.73 | Final B-leaderboard model |
+| StraightPCF 复现 | 73.61 | - | - | 初始复现基线 |
+| V12 | 80.70 | 68.68 | 92.73 | 早期稳定 parent 模型 |
+| V29 | 81.37 | 70.83 | 91.91 | 有效的结构升级 |
+| V33 | 82.53 | 72.10 | 92.95 | 改进 residual refinement |
+| V40 | 82.89 | 72.78 | 93.01 | CD/P2S 平衡较好 |
+| V45 | 83.00 | 72.94 | 93.06 | A 榜后期稳定 parent |
+| V65 | 83.13 | 73.21 | 93.06 | A 榜最终模型 |
+| B20 | 81.41 | 70.10 | 92.71 | B 榜适配后的强基线 |
+| B24 | 81.44 | 70.15 | 92.73 | B 榜最终模型 |
 
-## B-leaderboard Adaptation
+## B 榜适配
 
-The B-leaderboard data distribution differs from the A-leaderboard distribution. Directly transferring an A-leaderboard model is a useful starting point, but B24 further adapts the model through:
+B 榜数据分布与 A 榜存在差异。直接迁移 A 榜模型可以作为起点，但 B24 进一步做了以下适配：
 
-- B-leaderboard data lists and validation protocol.
-- Teacher-anchored residual refinement.
-- CD/P2S gradient conflict handling.
-- Fixed checkpoint and inference-strength selection.
+- 使用 B 榜数据列表与验证协议。
+- 采用 teacher 锚定的 residual refinement。
+- 引入 CD/P2S 梯度冲突处理。
+- 固定 checkpoint 与推理强度选择流程。
 
-## Ablation Insights
+## 消融观察
 
-Experiments with larger model changes and routing-style combinations showed that local complementarity does not always translate into robust leaderboard improvement. B24 therefore favors a stable residual design with explicit movement bounds and reproducible model selection.
+更大的结构变化和 routing 类组合方法在局部区域存在互补性，但不一定能稳定转化为线上分数提升。B24 因此选择带有显式移动约束的稳定 residual 设计，并通过可复现的验证选择流程确定最终模型。
